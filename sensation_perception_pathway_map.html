@@ -1,0 +1,416 @@
+
+<style>
+  h2.sr-only { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .map-wrap { padding: 0.5rem 0; font-family: var(--font-sans); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+  .pathway-block { margin-bottom: 20px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+  .pathway-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+  .pathway-header:hover { background: var(--color-background-secondary); }
+  .pathway-number { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .pathway-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+  .pathway-subtitle { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+  .pathway-toggle { font-size: 14px; color: var(--color-text-tertiary); transition: transform 0.2s; }
+  .pathway-toggle.open { transform: rotate(90deg); }
+  .pathway-body { padding: 0 14px 14px; display: none; }
+  .pathway-body.open { display: block; }
+
+  .node-row { display: flex; align-items: flex-start; gap: 0; margin: 10px 0 4px; flex-wrap: wrap; }
+  .node { border-radius: 6px; border: 0.5px solid; padding: 5px 9px; font-size: 11px; font-weight: 500; cursor: pointer; transition: opacity 0.15s, transform 0.1s; flex-shrink: 0; margin: 2px 0; white-space: nowrap; }
+  .node:hover { opacity: 0.8; transform: scale(1.03); }
+  .arrow { color: var(--color-text-tertiary); font-size: 13px; padding: 0 3px; align-self: center; flex-shrink: 0; margin: 2px 0; }
+
+  .crossing-section { margin-top: 12px; }
+  .crossing-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .crossings { display: flex; flex-wrap: wrap; gap: 6px; }
+  .crossing-badge { border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 500; cursor: pointer; border: 0.5px solid; }
+  .crossing-badge:hover { opacity: 0.75; }
+
+  .hook-box { margin-top: 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 9px 12px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; border-left: 2px solid; }
+  .hook-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+
+  .sources-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+  .source-tag { font-size: 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: 4px; padding: 2px 6px; color: var(--color-text-tertiary); }
+
+  .crossing-detail { display: none; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; margin-top: 8px; font-size: 12px; line-height: 1.6; color: var(--color-text-secondary); }
+  .crossing-detail.open { display: block; }
+  .crossing-detail strong { color: var(--color-text-primary); font-weight: 500; }
+
+  .global-map { margin-bottom: 22px; }
+  .map-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 8px; }
+
+  .P1 { background: #EEF2FF; border-color: #8B87DD; color: #3B3589; }
+  .P2 { background: #E1F5EE; border-color: #1D9E75; color: #085041; }
+  .P3 { background: #FFF3E0; border-color: #BA7517; color: #633806; }
+  .P4 { background: #FDE8EE; border-color: #D4537E; color: #72243E; }
+  .PX { background: #F1EFE8; border-color: #888780; color: #444441; }
+
+  @media (prefers-color-scheme: dark) {
+    .P1 { background: #26215C; border-color: #AFA9EC; color: #CECBF6; }
+    .P2 { background: #04342C; border-color: #5DCAA5; color: #9FE1CB; }
+    .P3 { background: #412402; border-color: #EF9F27; color: #FAC775; }
+    .P4 { background: #4B1528; border-color: #ED93B1; color: #F4C0D1; }
+    .PX { background: #2C2C2A; border-color: #B4B2A9; color: #D3D1C7; }
+  }
+
+  .p1-accent { border-left-color: #8B87DD; }
+  .p2-accent { border-left-color: #1D9E75; }
+  .p3-accent { border-left-color: #BA7517; }
+  .p4-accent { border-left-color: #D4537E; }
+
+  .pn1 { background:#EEEDFE; border-color:#534AB7; color:#3C3489; }
+  .pn2 { background:#E1F5EE; border-color:#0F6E56; color:#085041; }
+  .pn3 { background:#FAEEDA; border-color:#854F0B; color:#633806; }
+  .pn4 { background:#FBEAF0; border-color:#993556; color:#72243E; }
+  @media (prefers-color-scheme: dark) {
+    .pn1 { background:#26215C; border-color:#AFA9EC; color:#CECBF6; }
+    .pn2 { background:#04342C; border-color:#5DCAA5; color:#9FE1CB; }
+    .pn3 { background:#412402; border-color:#EF9F27; color:#FAC775; }
+    .pn4 { background:#4B1528; border-color:#ED93B1; color:#F4C0D1; }
+  }
+</style>
+
+<div class="map-wrap">
+  <h2 class="sr-only">Sensation and Perception course concept pathways — interactive blueprint for final exam design</h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#534AB7"></div>Pathway 1: Full perceptual stack</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0F6E56"></div>Pathway 2: What the brain represents</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#854F0B"></div>Pathway 3: Prediction engine</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#993556"></div>Pathway 4: Evolution &amp; ecology</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#888780"></div>Crossing point (multi-pathway)</div>
+  </div>
+
+  <!-- PATHWAY 1 -->
+  <div class="pathway-block">
+    <div class="pathway-header" onclick="toggle('p1')">
+      <div class="pathway-number pn1">1</div>
+      <div style="flex:1">
+        <div class="pathway-title">From photon to person — the full perceptual stack</div>
+        <div class="pathway-subtitle">Hardware → software → behavior · Ch. 1, 3, 4, 5, 6 · PPT 1–6</div>
+      </div>
+      <div class="pathway-toggle" id="p1-toggle">▶</div>
+    </div>
+    <div class="pathway-body" id="p1-body">
+      <div class="node-row">
+        <div class="node P1" onclick="ping('Distal stimulus → proximal stimulus → transduction')">Distal → proximal stimulus</div>
+        <div class="arrow">→</div>
+        <div class="node P1" onclick="ping('Transduction: converting environmental energy to neural signals')">Transduction</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Center-surround receptive fields and lateral inhibition')">Center-surround RFs</div>
+        <div class="arrow">→</div>
+        <div class="node P1" onclick="ping('Feature detectors: simple, complex, hypercomplex cells, Hubel and Wiesel')">Feature detectors</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Columnar organization in V1')">Columnar org. V1</div>
+      </div>
+      <div class="node-row">
+        <div class="node P1" onclick="ping('What and where/how streams: ventral and dorsal pathways')">What vs. where/how streams</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Object recognition: LOC, FFA, PPA, EBA — modular vs distributed')">LOC / FFA / PPA</div>
+        <div class="arrow">→</div>
+        <div class="node P1" onclick="ping('Top-down modulation: how knowledge shapes perception')">Top-down modulation</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Attention: feature integration theory, preattentive vs focused stages, binding')">Attention (FIT)</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Inattentional blindness and change blindness as failures of the perceptual stack')">Inattentional / change blindness</div>
+      </div>
+
+      <div class="crossing-section">
+        <div class="crossing-label">Crossing points with other pathways</div>
+        <div class="crossings">
+          <div class="crossing-badge PX" onclick="showCrossing('c-rf')">Lateral inhibition / RFs</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-ffa')">FFA &amp; face perception</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-blind')">Inattentional blindness</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-thresh')">Thresholds &amp; Weber</div>
+        </div>
+        <div class="crossing-detail" id="c-rf">
+          <strong>Lateral inhibition / center-surround RFs</strong> — crosses P1, P2, P3. It is <em>hardware</em> (the wiring of ganglion cells), <em>representation</em> (it explains why neurons respond to edges rather than diffuse light), and <em>prediction</em> (center-surround antagonism amplifies difference signals, which is exactly what a prediction-error system needs). A question here can reach from retinal anatomy all the way to Bayesian inference.
+        </div>
+        <div class="crossing-detail" id="c-ffa">
+          <strong>FFA &amp; face perception</strong> — crosses P1, P2, P4. Structurally it is a node in the ventral what-pathway (P1). Representationally it is the debate between modular and distributed coding (P2). Evolutionarily it raises the expertise hypothesis and the question of whether face specialization is innate or learned (P4). Prosopagnosia is a clean clinical anchor.
+        </div>
+        <div class="crossing-detail" id="c-blind">
+          <strong>Inattentional &amp; change blindness</strong> — crosses P1, P3. These are failures of the attentional gate (P1 top of stack). But they are equally explained by predictive coding: if the brain already has a stable prediction of the scene, it generates no error signal for changes it does not attend to (P3). This is one of the richest exam questions in the whole course.
+        </div>
+        <div class="crossing-detail" id="c-thresh">
+          <strong>Thresholds, Weber's Law &amp; psychophysics</strong> — crosses P1, P3. Absolute threshold = the signal level needed to cross from bottom-up input to conscious perception. Difference threshold (Weber) = the signal level needed to generate a prediction-error signal large enough to notice. Psychophysics is thus the measurement methodology that lives at the intersection of hardware and prediction.
+        </div>
+      </div>
+
+      <div class="hook-box p1-accent">
+        <div class="hook-label">Self-reference hook</div>
+        You were so absorbed in your phone that you missed someone calling your name. Walk that failure from the photoreceptor all the way up — where exactly did the signal die, and what was the brain doing instead?
+      </div>
+      <div class="sources-row">
+        <div class="source-tag">PPT 1</div><div class="source-tag">PPT 3</div><div class="source-tag">PPT 4</div><div class="source-tag">PPT 5</div><div class="source-tag">PPT 6</div>
+        <div class="source-tag">Ch. 1</div><div class="source-tag">Ch. 3</div><div class="source-tag">Ch. 4</div><div class="source-tag">Ch. 5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATHWAY 2 -->
+  <div class="pathway-block">
+    <div class="pathway-header" onclick="toggle('p2')">
+      <div class="pathway-number pn2">2</div>
+      <div style="flex:1">
+        <div class="pathway-title">What the brain represents — from edges to abstract concepts</div>
+        <div class="pathway-subtitle">Neural coding · Ch. 3, 4, 5 · Roy (2017) · Mellet et al. (2019)</div>
+      </div>
+      <div class="pathway-toggle" id="p2-toggle">▶</div>
+    </div>
+    <div class="pathway-body" id="p2-body">
+      <div class="node-row">
+        <div class="node P2" onclick="ping('Center-surround RFs detect edges')">Center-surround: edges</div>
+        <div class="arrow">→</div>
+        <div class="node P2" onclick="ping('Simple and complex cells: orientation, motion, Hubel and Wiesel')">Simple / complex cells</div>
+        <div class="arrow">→</div>
+        <div class="node P2" onclick="ping('IT cortex neurons: face cells, object cells in inferotemporal cortex')">IT cortex selectivity</div>
+        <div class="arrow">→</div>
+        <div class="node P2" onclick="ping('Concept cells and grandmother cells: Quiroga Halle Berry neuron')">Concept cells (Quiroga)</div>
+      </div>
+      <div class="node-row">
+        <div class="node P2" onclick="ping('Modality-invariant neurons: same neuron fires to picture, text, and spoken name')">Modality-invariant neurons</div>
+        <div class="arrow">→</div>
+        <div class="node P2" onclick="ping('Multisensory integration: neocortex is essentially multisensory, Roy 2017')">Multisensory integration</div>
+        <div class="arrow">→</div>
+        <div class="node P2" onclick="ping('Abstract symbolic representation: layered hierarchy from bi-modal to multimodal concepts')">Abstract representation</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Hominin engravings processed along ventral pathway like objects: Mellet 2019')">Engravings → ventral pathway</div>
+      </div>
+
+      <div class="crossing-section">
+        <div class="crossing-label">Crossing points with other pathways</div>
+        <div class="crossings">
+          <div class="crossing-badge PX" onclick="showCrossing('c-ffa2')">FFA: modular vs. distributed</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-mvpa')">fMRI decoding (MVPA)</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-engraving')">Hominin engravings</div>
+        </div>
+        <div class="crossing-detail" id="c-ffa2">
+          <strong>FFA: modular vs. distributed debate</strong> — the same structure crosses P1 (ventral stream), P2 (what does a brain area represent?), and P4 (is it innate or learned?). The Greeble expertise experiment and the Kanwisher face-selectivity studies represent two answers to the same question: does the brain have dedicated modules, or does specialization emerge from experience?
+        </div>
+        <div class="crossing-detail" id="c-mvpa">
+          <strong>fMRI decoding &amp; MVPA</strong> — Kamitani &amp; Tong (orientation decoding) and Nishimoto (movie reconstruction) are simultaneously a <em>methodology lesson</em> (how fMRI voxel patterns encode information) and a <em>representation lesson</em> (what does it mean that a decoder can read the brain like a dictionary?). This question bridges P2 and P3 — if the brain holds decodable representations, it holds something like internal models.
+        </div>
+        <div class="crossing-detail" id="c-engraving">
+          <strong>Hominin engravings (Mellet et al. 2019)</strong> — the capstone for P2 and P4 together. The engravings activate the ventral pathway and the visual word form area — the same regions activated by objects and written symbols. This means the neural architecture for symbolic processing is at least 500,000 years old. The question for students: does this mean early hominins <em>intended</em> symbolic meaning, or that modern brains project meaning onto patterns that the visual system is already tuned to detect?
+        </div>
+      </div>
+
+      <div class="hook-box p2-accent">
+        <div class="hook-label">Self-reference hook</div>
+        A song comes on and you instantly see a specific place. A smell brings back a face. Map that experience onto the hierarchy of representation we studied — from the single neuron that fires to the spoken name and the photograph, all the way to the abstract concept.
+      </div>
+      <div class="sources-row">
+        <div class="source-tag">PPT 3</div><div class="source-tag">PPT 4</div><div class="source-tag">PPT 5</div>
+        <div class="source-tag">Ch. 3</div><div class="source-tag">Ch. 4</div><div class="source-tag">Ch. 5</div>
+        <div class="source-tag">Roy 2017</div><div class="source-tag">Mellet 2019</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATHWAY 3 -->
+  <div class="pathway-block">
+    <div class="pathway-header" onclick="toggle('p3')">
+      <div class="pathway-number pn3">3</div>
+      <div style="flex:1">
+        <div class="pathway-title">The prediction engine — the brain constructs reality</div>
+        <div class="pathway-subtitle">Inference, priors, Gestalt, predictive coding · Ch. 1, 5 · PPT 1, 5, 6</div>
+      </div>
+      <div class="pathway-toggle" id="p3-toggle">▶</div>
+    </div>
+    <div class="pathway-body" id="p3-body">
+      <div class="node-row">
+        <div class="node P3" onclick="ping('Distal vs proximal stimulus: the gap between world and retina')">Distal/proximal gap</div>
+        <div class="arrow">→</div>
+        <div class="node P3" onclick="ping('Inverse projection problem: many objects can cause the same retinal image')">Inverse projection problem</div>
+        <div class="arrow">→</div>
+        <div class="node P3" onclick="ping('Gestalt laws as internalized environmental regularities: proximity, similarity, good continuation, common fate')">Gestalt = internalized regularities</div>
+        <div class="arrow">→</div>
+        <div class="node P3" onclick="ping('Scene schema: top-down knowledge of what belongs where')">Scene schema</div>
+      </div>
+      <div class="node-row">
+        <div class="node P3" onclick="ping('Unconscious inference: Helmholtz likelihood principle')">Unconscious inference (Helmholtz)</div>
+        <div class="arrow">→</div>
+        <div class="node P3" onclick="ping('Bayesian inference: prior probability times likelihood gives perception')">Bayesian inference</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Predictive coding: predictions flow downward, error signals flow upward')">Predictive coding</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Inattentional and change blindness as prediction-maintenance failures')">Blindness as prediction success</div>
+      </div>
+
+      <div class="crossing-section">
+        <div class="crossing-label">Crossing points with other pathways</div>
+        <div class="crossings">
+          <div class="crossing-badge PX" onclick="showCrossing('c-pred')">Predictive coding</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-gestalt')">Gestalt → regularities → ecology</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-weber2')">Weber / thresholds as prediction errors</div>
+        </div>
+        <div class="crossing-detail" id="c-pred">
+          <strong>Predictive coding</strong> — the single most integrative concept in the course. It explains Gestalt laws (the brain learned environmental regularities and uses them as priors), thresholds (a stimulus must exceed the prediction to generate an error signal), inattentional blindness (no error = no update = no notice), and the Rat-Man demonstration (prior context sets the prediction that disambiguates the percept). A question asking students to explain any perceptual phenomenon through predictive coding forces them to synthesize almost the whole course.
+        </div>
+        <div class="crossing-detail" id="c-gestalt">
+          <strong>Gestalt laws as ecological regularities</strong> — crosses P3 and P4. The laws of proximity, similarity, good continuation, and common fate are not arbitrary — they reflect statistical regularities in natural scenes. This makes them simultaneously <em>prediction mechanisms</em> (P3) and <em>adaptations</em> (P4). The visual system learned these regularities because they are useful for survival, not because they are logically necessary.
+        </div>
+        <div class="crossing-detail" id="c-weber2">
+          <strong>Weber's Law / thresholds as prediction errors</strong> — crosses P1, P3. An absolute threshold is the signal level at which bottom-up input is strong enough to override the brain's current prediction. A difference threshold (Weber) is how much change is needed to generate a prediction-error signal. This reframes classical psychophysics entirely — Fechner was measuring the sensitivity of a prediction-error system, not a passive sensor.
+        </div>
+      </div>
+
+      <div class="hook-box p3-accent">
+        <div class="hook-label">Self-reference hook</div>
+        You walked into your kitchen this morning and "saw" it. How much of what you experienced was actually on your retina? Use predictive coding, scene schemas, and Gestalt regularities to describe what your brain actually did in the first 250 milliseconds.
+      </div>
+      <div class="sources-row">
+        <div class="source-tag">PPT 1</div><div class="source-tag">PPT 5</div><div class="source-tag">PPT 6</div>
+        <div class="source-tag">Ch. 1</div><div class="source-tag">Ch. 5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATHWAY 4 -->
+  <div class="pathway-block">
+    <div class="pathway-header" onclick="toggle('p4')">
+      <div class="pathway-number pn4">4</div>
+      <div style="flex:1">
+        <div class="pathway-title">Why perception is ancient — evolution, ecology &amp; the adapted brain</div>
+        <div class="pathway-subtitle">Ecological tuning · Ch. 3, 4, 5 · Mellet et al. (2019) · JNP paper</div>
+      </div>
+      <div class="pathway-toggle" id="p4-toggle">▶</div>
+    </div>
+    <div class="pathway-body" id="p4-body">
+      <div class="node-row">
+        <div class="node P4" onclick="ping('Receptor diversity across species: ecological specialization')">Receptor specialization across species</div>
+        <div class="arrow">→</div>
+        <div class="node P4" onclick="ping('Center-surround RFs as solution to edge-detection in natural scenes')">RFs as ecological solutions</div>
+        <div class="arrow">→</div>
+        <div class="node P4" onclick="ping('What the visual system is built to do: edges, motion, faces, looming signals')">What vision is built for</div>
+        <div class="arrow">→</div>
+        <div class="node P4" onclick="ping('Defense-related multisensory neurons: looming visual-auditory-somatosensory convergence')">Defense neurons (looming)</div>
+      </div>
+      <div class="node-row">
+        <div class="node PX" onclick="ping('Face perception: FFA, expertise hypothesis, innate vs learned, developmental trajectory')">Face perception: innate vs. learned</div>
+        <div class="arrow">→</div>
+        <div class="node P4" onclick="ping('Ventral pathway: evolutionarily conserved across primates, homologous functional subdivisions')">Ventral pathway: conserved</div>
+        <div class="arrow">→</div>
+        <div class="node PX" onclick="ping('Hominin engravings: 500,000 year old visual symbols activate ventral pathway and visual word form area')">Engravings: 500k yr symbolic vision</div>
+        <div class="arrow">→</div>
+        <div class="node P4" onclick="ping('Was symbolic cognition an adaptation or an emergent byproduct of the visual system?')">Symbolic cognition: adaptation?</div>
+      </div>
+
+      <div class="crossing-section">
+        <div class="crossing-label">Crossing points with other pathways</div>
+        <div class="crossings">
+          <div class="crossing-badge PX" onclick="showCrossing('c-ffa3')">FFA evolution</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-gestalt2')">Gestalt as adaptation</div>
+          <div class="crossing-badge PX" onclick="showCrossing('c-multi')">Multisensory as survival</div>
+        </div>
+        <div class="crossing-detail" id="c-ffa3">
+          <strong>FFA &amp; face evolution</strong> — the newborn face-tracking data (Morton &amp; Johnson) suggests the FFA connection is prewired, setting up a developmental trajectory from birth to adolescence. The expertise hypothesis asks whether this wiring is face-specific or domain-general. Both sides of the debate have ecological arguments: faces are the most important social stimuli (specificity view), or the system is a general-purpose expert-recognition module (expertise view).
+        </div>
+        <div class="crossing-detail" id="c-gestalt2">
+          <strong>Gestalt laws as adaptations (P3 × P4)</strong> — physical regularities in natural scenes (surfaces tend to be uniform, objects tend to move together, contours tend to be smooth) are the statistical structure that the visual system learned to expect. Gestalt laws are the behavioral fingerprint of that learning. They are simultaneously <em>prediction mechanisms</em> and <em>adaptations</em> to the environment in which our ancestors evolved.
+        </div>
+        <div class="crossing-detail" id="c-multi">
+          <strong>Multisensory integration as survival (P2 × P4)</strong> — defense-related neurons in premotor cortex respond to looming visual, auditory, and somatosensory signals. The neocortex is essentially multisensory (Ghazanfar &amp; Schroeder 2006) because real-world threats arrive across modalities simultaneously. The Roy (2017) hierarchy of abstraction from bi-modal neurons to concept cells is not just a representational story — it is an ecological one: organisms that integrate modalities survive better.
+        </div>
+      </div>
+
+      <div class="hook-box p4-accent">
+        <div class="hook-label">Self-reference hook</div>
+        Your visual system was shaped by hundreds of millions of years of evolution. Pick three specific design features we studied and argue that each one is an adaptation to a specific environmental challenge. Now explain why that same ancient system can process a 500,000-year-old abstract engraving.
+      </div>
+      <div class="sources-row">
+        <div class="source-tag">PPT 3</div><div class="source-tag">PPT 4</div><div class="source-tag">PPT 5</div>
+        <div class="source-tag">Ch. 3</div><div class="source-tag">Ch. 4</div><div class="source-tag">Ch. 5</div>
+        <div class="source-tag">Mellet 2019</div><div class="source-tag">Roy 2017</div><div class="source-tag">JNP 2008</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CROSSING POINT MASTER TABLE -->
+  <div class="pathway-block">
+    <div class="pathway-header" onclick="toggle('px')">
+      <div class="pathway-number PX">✕</div>
+      <div style="flex:1">
+        <div class="pathway-title">Master crossing points — best exam question anchors</div>
+        <div class="pathway-subtitle">Nodes where 2+ pathways intersect — highest synthesis demand</div>
+      </div>
+      <div class="pathway-toggle" id="px-toggle">▶</div>
+    </div>
+    <div class="pathway-body" id="px-body">
+      <div style="display:grid;gap:8px;margin-top:4px;">
+
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;border:0.5px solid var(--color-border-tertiary)">
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Lateral inhibition / center-surround RFs</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px">Pathways 1 · 2 · 3</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5">Hardware wiring (P1) that determines what the system can represent (P2) and that implements contrast enhancement — amplifying the difference signals a prediction-error system relies on (P3).</div>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;border:0.5px solid var(--color-border-tertiary)">
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">FFA &amp; face perception</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px">Pathways 1 · 2 · 4</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5">Node in ventral stream (P1) · modular vs. distributed debate (P2) · innate prewiring vs. expertise, developmental trajectory, prosopagnosia (P4).</div>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;border:0.5px solid var(--color-border-tertiary)">
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Predictive coding</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px">Pathways 1 · 2 · 3 · 4</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5">The single most integrative concept: explains thresholds (P1), why brain holds internal models (P2), why Gestalt works (P3), and why these predictions are ecologically tuned (P4).</div>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;border:0.5px solid var(--color-border-tertiary)">
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Inattentional / change blindness</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px">Pathways 1 · 3</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5">Failure at the attentional gate (P1 top of stack) · or: the brain's prediction was so stable it generated no error signal for the unattended change (P3). Same phenomenon, two mechanistic explanations.</div>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;border:0.5px solid var(--color-border-tertiary)">
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Hominin engravings (Mellet et al. 2019)</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px">Pathways 2 · 4 + methodology</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5">fMRI methodology · ventral pathway processing of abstract marks as objects (P2) · 500k-year-old evolutionary roots of symbolic visual cognition (P4) · neurovisual resonance vs. intentional symbolism debate.</div>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;border:0.5px solid var(--color-border-tertiary)">
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Thresholds / Weber's Law</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px">Pathways 1 · 3 + methodology</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5">Classical psychophysics methodology · the measurement of where bottom-up signal crosses into awareness (P1) · reframed as measuring the sensitivity of a prediction-error system (P3).</div>
+        </div>
+
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;border:0.5px solid var(--color-border-tertiary)">
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Columnar organization / feature maps</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:5px">Pathways 1 · 2 · 4</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5">Architectural principle (P1) · basis for population coding and distributed representation (P2) · conserved across species including the auditory and somatosensory cortex, suggesting deep evolutionary roots (P4).</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(id) {
+  const body = document.getElementById(id+'-body');
+  const tog = document.getElementById(id+'-toggle');
+  const open = body.classList.toggle('open');
+  tog.classList.toggle('open', open);
+}
+
+function showCrossing(id) {
+  const all = document.querySelectorAll('.crossing-detail');
+  all.forEach(d => { if (d.id !== id) d.classList.remove('open'); });
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+function ping(msg) {
+  if (typeof sendPrompt === 'function') sendPrompt('Tell me more about: ' + msg);
+}
+
+toggle('px');
+</script>
