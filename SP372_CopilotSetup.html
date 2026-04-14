@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SP372 · AI Study Assistant Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #0f0f12;
+  --surface: #17171b;
+  --surface2:#1f1f25;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text:    #e8e4dc;
+  --text2:   #b0aca3;
+  --muted:   #6a6760;
+  --p2: #3ecf96; --p2bg: rgba(62,207,150,0.08); --p2bd: rgba(62,207,150,0.2);
+  --p3: #f0b84a; --p3bg: rgba(240,184,74,0.08);  --p3bd: rgba(240,184,74,0.2);
+  --blue: #5b8dee;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 300;
+  min-height: 100vh;
+  padding: 2.5rem 1.5rem 3rem;
+}
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header { margin-bottom: 2rem; }
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.kicker::before { content: ''; width: 16px; height: 1px; background: var(--muted); }
+h1 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+h1 em { font-style: italic; color: var(--text2); }
+.header-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+
+/* Steps */
+.steps { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.75rem 0; }
+.step {
+  display: flex; gap: 1rem; align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+}
+.step-num {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--p2);
+  background: var(--p2bg);
+  border: 1px solid var(--p2bd);
+  border-radius: 5px;
+  padding: 0.15rem 0.5rem;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+.step-text { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+.step-text strong { color: var(--text); font-weight: 500; }
+
+/* Prompt box */
+.prompt-section { margin: 1.75rem 0; }
+.prompt-label {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+.prompt-label-text {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--p3);
+}
+.copy-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--p3); }
+.copy-btn.copied { color: var(--p2); border-color: var(--p2); }
+
+.prompt-box {
+  background: var(--surface);
+  border: 1px solid var(--p3bd);
+  border-radius: 10px;
+  padding: 1.25rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text2);
+  white-space: pre-wrap;
+  word-break: break-word;
+  position: relative;
+}
+.prompt-box .rule-label {
+  display: block;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 0.75rem;
+  margin-bottom: 0.1rem;
+}
+.prompt-box .rule-label:first-child { margin-top: 0; }
+.prompt-box .highlight {
+  color: var(--p3);
+  font-weight: 500;
+}
+.prompt-box .scenario-q {
+  display: block;
+  background: var(--p3bg);
+  border-left: 2px solid var(--p3);
+  padding: 0.5rem 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: 0 6px 6px 0;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* Files section */
+.files-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin: 1.75rem 0;
+}
+.files-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+.file-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.file-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.85rem; color: var(--text2);
+}
+.file-item::before {
+  content: '↑';
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--p2);
+  flex-shrink: 0;
+}
+.file-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  font-style: italic;
+}
+
+/* Your task box */
+.task-box {
+  background: var(--p2bg);
+  border: 1px solid var(--p2bd);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin: 1.75rem 0;
+}
+.task-box-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--p2);
+  margin-bottom: 0.5rem;
+}
+.task-box p {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.65;
+}
+.task-box strong { color: var(--p2); }
+
+/* Footer */
+footer {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.footer-text { font-family: var(--font-mono); font-size: 0.63rem; color: var(--muted); }
+.footer-link { font-family: var(--font-mono); font-size: 0.63rem; color: var(--muted); text-decoration: none; }
+.footer-link:hover { color: var(--text); }
+
+/* Print styles */
+@media print {
+  body { background: white; color: black; padding: 1cm; }
+  .copy-btn { display: none; }
+  .prompt-box { border: 1px solid #ccc; color: #333; font-size: 0.75rem; }
+  .step { background: #f9f9f9; border: 1px solid #ddd; }
+  .task-box { background: #f0fbf5; border: 1px solid #9de; }
+  .files-section { background: #f9f9f9; border: 1px solid #ddd; }
+  h1 { color: black; font-size: 1.8rem; }
+  .kicker, .footer-text, .footer-link { color: #888; }
+  .step-num { background: #e8fff6; border: 1px solid #9de; color: #0a5; }
+  .prompt-box .highlight { color: #7a4800; }
+  .prompt-box .scenario-q { background: #fff8e1; border-left: 2px solid #c8860a; color: #333; }
+  .prompt-label-text { color: #7a4800; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <p class="kicker">BIOL | PSYCH 372 &nbsp;·&nbsp; Final Exam Review &nbsp;·&nbsp; Session 1</p>
+    <h1>AI Study Assistant <em>Setup Guide</em></h1>
+    <p class="header-desc">Use Microsoft Copilot with your course materials to probe the concepts, then build a scenario from your own experience to share with the class.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">01</span>
+      <p class="step-text">Open <strong>Microsoft Copilot</strong> and start a <strong>new chat</strong>. Sign in with your school account.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">02</span>
+      <p class="step-text"><strong>Copy the prompt below</strong> and paste it into the chat as your first message. Send it before uploading anything.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">03</span>
+      <p class="step-text"><strong>Upload the files listed below</strong> using the attachment button (the + or paperclip icon in the chat bar).</p>
+    </div>
+    <div class="step">
+      <span class="step-num">04</span>
+      <p class="step-text"><strong>Ask about any concept</strong> from the course that interests or confuses you. When Copilot responds, it will ask you to build a scenario — do that, then bring it to share with the class.</p>
+    </div>
+  </div>
+
+  <div class="prompt-section">
+    <div class="prompt-label">
+      <span class="prompt-label-text">Paste this prompt first — before uploading files</span>
+      <button class="copy-btn" onclick="copyPrompt(this)" id="copy-btn">
+        <span>⎘</span> Copy prompt
+      </button>
+    </div>
+    <div class="prompt-box" id="prompt-text">You are a study assistant for a university course called Sensation and Perception. The student will upload course materials. Your job is to help them think more deeply — not to summarize for them.
+
+<span class="rule-label">RULE 1 — Use the uploaded materials first.</span>If the answer is in the uploaded files, use that. Only use general knowledge if the concept is not covered in the files.
+
+<span class="rule-label">RULE 2 — Always explain the mechanism.</span>Do not just define terms. Explain how something works — what causes what, in what order, through which neural structures or processes. If asked "what is lateral inhibition," explain the mechanism and what it produces perceptually.
+
+<span class="rule-label">RULE 3 — Place every concept in one of the four course pathways:</span>• Pathway 1: The full perceptual stack — from transduction to awareness
+• Pathway 2: What the brain represents — from edges to concept cells
+• Pathway 3: The prediction engine — Gestalt, Bayesian inference, predictive coding
+• Pathway 4: Why perception is ancient — evolution, ecology, the adapted brain
+
+If the concept crosses multiple pathways, say which ones and why.
+
+<span class="rule-label">RULE 4 — End every response with exactly this question:</span><span class="scenario-q">Now build a scenario from your own life where you have experienced this. Describe what was happening, then explain it using the mechanism you just learned about. Which pathway does your scenario belong to — and does it touch any other pathway?</span>
+<span class="rule-label">RULE 5 — Do not write the scenario for the student.</span>If asked, redirect: "That one is yours to build — I can help you check it once you have a draft."
+
+<span class="rule-label">RULE 6 — When a student shares their scenario, do three things:</span>Confirm what they got right. Identify one thing they missed or could go deeper on. Ask one follow-up question that pushes the mechanism further.</div>
+  </div>
+
+  <div class="files-section">
+    <p class="files-label">Upload these files after sending the prompt</p>
+    <div class="file-list">
+      <div class="file-item">SP372_PathwayReference.txt — course concept map with definitions and exam prompts</div>
+      <div class="file-item">Your course chapter PDFs — upload whichever chapters you want to probe</div>
+    </div>
+    <p class="file-note">Upload using the + or paperclip button in the Copilot chat bar. You can add more files mid-conversation.</p>
+  </div>
+
+  <div class="task-box">
+    <p class="task-box-label">Your task for today</p>
+    <p>Explore the materials and find <strong>one concept that genuinely interests or confuses you</strong>. Ask Copilot about it. When it asks you to build a scenario — do it. Write down your scenario and <strong>bring it to share with the class</strong>. That's all you need to do.</p>
+  </div>
+
+  <footer>
+    <span class="footer-text">BIOL | PSYCH 372 &nbsp;·&nbsp; Sensation &amp; Perception</span>
+    <a class="footer-link" href="index.html">← Back to review hub</a>
+  </footer>
+
+</div>
+
+<script>
+function copyPrompt(btn) {
+  // Get plain text version of the prompt
+  const promptEl = document.getElementById('prompt-text');
+  
+  // Walk text nodes to get clean text
+  function getCleanText(el) {
+    let text = '';
+    el.childNodes.forEach(node => {
+      if (node.nodeType === 3) { // text node
+        text += node.textContent;
+      } else if (node.nodeType === 1) {
+        const tag = node.tagName.toLowerCase();
+        if (tag === 'span') {
+          const cls = node.className;
+          if (cls === 'rule-label') {
+            text += '\n' + node.textContent + '\n';
+          } else if (cls === 'scenario-q') {
+            text += node.textContent;
+          } else {
+            text += node.textContent;
+          }
+        }
+      }
+    });
+    return text.trim();
+  }
+  
+  const plainText = getCleanText(promptEl);
+  
+  navigator.clipboard.writeText(plainText).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>✓</span> Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span>⎘</span> Copy prompt';
+    }, 2500);
+  }).catch(() => {
+    // Fallback: select the text
+    const range = document.createRange();
+    range.selectNode(promptEl);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    btn.innerHTML = '<span>↑</span> Selected — copy with Ctrl+C';
+    setTimeout(() => { btn.innerHTML = '<span>⎘</span> Copy prompt'; }, 3000);
+  });
+}
+</script>
+</body>
+</html>
