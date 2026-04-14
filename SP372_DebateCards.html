@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SP372 · Crossing Point Debate Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f0f11;
+    --surface:  #17171a;
+    --surface2: #1f1f24;
+    --surface3: #272730;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.13);
+    --text:     #e8e6e0;
+    --muted:    #7a7870;
+    --subtle:   #2e2d2a;
+
+    --p1: #7c75e8;   --p1bg: rgba(124,117,232,0.10); --p1bd: rgba(124,117,232,0.25);
+    --p2: #2db887;   --p2bg: rgba(45,184,135,0.10);  --p2bd: rgba(45,184,135,0.25);
+    --p3: #e8a83a;   --p3bg: rgba(232,168,58,0.10);  --p3bd: rgba(232,168,58,0.25);
+    --p4: #e06b8e;   --p4bg: rgba(224,107,142,0.10); --p4bd: rgba(224,107,142,0.25);
+    --px: #a09d96;   --pxbg: rgba(160,157,150,0.10); --pxbd: rgba(160,157,150,0.25);
+    --blue:  #5b8dee; --bluebg: rgba(91,141,238,0.10); --bluebd: rgba(91,141,238,0.30);
+    --red:   #e06060; --redbg:  rgba(224,96,96,0.10);  --redbd:  rgba(224,96,96,0.30);
+
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-body:    'DM Sans', system-ui, sans-serif;
+    --font-mono:    'DM Mono', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: var(--font-body);
+    font-weight: 300;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── Layout shell ─────────────────────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* ── Top bar ──────────────────────────────────────────────────────── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .topbar-left .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .topbar-left h1 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-top: 0.15rem;
+  }
+  .topbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .nav-btn {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1rem;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-btn:hover:not(:disabled) { color: var(--text); border-color: var(--border2); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-counter {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    min-width: 52px;
+    text-align: center;
+  }
+
+  /* ── Group selector pills ─────────────────────────────────────────── */
+  .group-pills {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.75rem 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .group-pills::-webkit-scrollbar { display: none; }
+  .pill {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.3rem 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .pill:hover { color: var(--text); }
+  .pill.active { color: var(--text); background: var(--surface2); border-color: var(--border2); }
+
+  /* ── Main card area ───────────────────────────────────────────────── */
+  .card-area {
+    padding: 1.5rem 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* ── Card header ──────────────────────────────────────────────────── */
+  .card-header {
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    border-top: 3px solid var(--accent-color, var(--px));
+  }
+  .card-header .group-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .card-header .card-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .card-header .pathways-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  /* ── Reveal sections ──────────────────────────────────────────────── */
+  .reveal-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: opacity 0.2s;
+  }
+  .reveal-section.locked { opacity: 0.35; pointer-events: none; }
+
+  .reveal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+    gap: 0.75rem;
+  }
+  .reveal-header:hover { background: var(--surface2); }
+  .reveal-section.open .reveal-header { border-bottom-color: var(--border); }
+
+  .reveal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .reveal-badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .badge-context  { color: var(--muted);  border-color: var(--border2); background: var(--surface2); }
+  .badge-posA     { color: var(--p1);     border-color: var(--p1bd);    background: var(--p1bg); }
+  .badge-posB     { color: var(--p4);     border-color: var(--p4bd);    background: var(--p4bg); }
+  .badge-evidence { color: var(--p2);     border-color: var(--p2bd);    background: var(--p2bg); }
+  .badge-task     { color: var(--blue);   border-color: var(--bluebd);  background: var(--bluebg); }
+  .badge-challenge{ color: var(--red);    border-color: var(--redbd);   background: var(--redbg); }
+
+  .reveal-title {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .reveal-chevron {
+    color: var(--muted);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .reveal-section.open .reveal-chevron { transform: rotate(90deg); }
+  .reveal-section.locked .reveal-header { cursor: default; }
+
+  .reveal-body {
+    display: none;
+    padding: 1.25rem;
+  }
+  .reveal-section.open .reveal-body { display: block; }
+
+  .reveal-body p {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  /* Two-column position layout */
+  .positions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem;
+  }
+  @media (max-width: 600px) {
+    .positions-grid { grid-template-columns: 1fr; }
+  }
+  .position-box {
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid;
+  }
+  .position-box.pos-a {
+    background: var(--p1bg); border-color: var(--p1bd);
+  }
+  .position-box.pos-b {
+    background: var(--p4bg); border-color: var(--p4bd);
+  }
+  .position-box .pos-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .pos-a .pos-label { color: var(--p1); }
+  .pos-b .pos-label { color: var(--p4); }
+  .position-box p { font-size: 0.875rem; line-height: 1.6; }
+
+  /* Evidence list */
+  .evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .evidence-item {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+  .evidence-item::before {
+    content: '→';
+    color: var(--p2);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  /* Task box */
+  .task-box {
+    background: var(--bluebg);
+    border: 1px solid var(--bluebd);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+  }
+  .task-box .task-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 0.5rem;
+  }
+  .task-box p { font-size: 0.875rem; line-height: 1.65; }
+
+  /* Challenge box */
+  .challenge-box {
+    background: var(--redbg);
+    border: 1px solid var(--redbd);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+  }
+  .challenge-box .challenge-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.5rem;
+  }
+  .challenge-box p { font-size: 0.875rem; line-height: 1.65; }
+
+  /* ── Unlock button ────────────────────────────────────────────────── */
+  .unlock-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    text-align: center;
+    padding: 0.3rem;
+  }
+
+  /* ── Reveal-all bar ───────────────────────────────────────────────── */
+  .reveal-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .reveal-all-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 0.45rem 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .reveal-all-btn:hover { color: var(--text); }
+  .collapse-all-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.45rem 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .collapse-all-btn:hover { color: var(--text); }
+  .reveal-bar-note {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* ── Footer ───────────────────────────────────────────────────────── */
+  .page-footer {
+    border-top: 1px solid var(--border);
+    padding: 1rem 0 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .footer-legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .legend-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+  }
+  .footer-keys {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  kbd {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+  }
+
+  /* ── Instructor mode banner ───────────────────────────────────────── */
+  .instructor-banner {
+    background: var(--p3bg);
+    border: 1px solid var(--p3bd);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    color: var(--p3);
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .instructor-toggle {
+    background: transparent;
+    border: 1px solid var(--p3bd);
+    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    cursor: pointer;
+    color: var(--p3);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .instructor-toggle:hover { background: var(--p3bg); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="kicker">BIOL | PSYCH 372 &nbsp;·&nbsp; Session 2 · Group Activity</div>
+      <h1>Crossing Point Debate Cards</h1>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn" id="prev-btn" title="Previous card">&#8592;</button>
+      <span class="nav-counter" id="nav-counter">1 / 7</span>
+      <button class="nav-btn" id="next-btn" title="Next card">&#8594;</button>
+    </div>
+  </div>
+
+  <div class="group-pills" id="group-pills"></div>
+
+  <div class="card-area" id="card-area">
+    <!-- dynamically rendered -->
+  </div>
+
+  <div class="reveal-bar">
+    <button class="reveal-all-btn" id="reveal-all-btn">Reveal all sections</button>
+    <button class="collapse-all-btn" id="collapse-all-btn">Collapse all</button>
+    <span class="reveal-bar-note" id="reveal-note">0 of 5 revealed</span>
+  </div>
+
+  <footer class="page-footer">
+    <div class="footer-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--p1)"></div>P1 · Stack</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--p2)"></div>P2 · Representation</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--p3)"></div>P3 · Prediction</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--p4)"></div>P4 · Evolution</div>
+    </div>
+    <div class="footer-keys"><kbd>←</kbd> <kbd>→</kbd> navigate &nbsp;·&nbsp; <kbd>R</kbd> reveal all &nbsp;·&nbsp; <kbd>C</kbd> collapse</div>
+  </footer>
+
+</div>
+
+<script>
+const DEBATES = [
+  {
+    num: 1,
+    name: "Lateral inhibition / Center-surround RFs",
+    pathways: "Pathways 1  ·  2  ·  3",
+    accentVar: "--p1",
+    context: "Center-surround receptive fields are among the earliest wiring in the visual system — they live in the retina. Yet this same mechanism appears in conversations about neural representation and predictive coding. Your task is to connect all three.",
+    posA: "Center-surround RFs are purely a hardware feature. They are retinal wiring that maximizes edge detection by amplifying contrast at borders. Their explanatory role ends at the retinal ganglion cell.",
+    posB: "Center-surround RFs are the beginning of a system built to detect differences — prediction errors — not raw luminance. They implement the same computational logic as predictive coding at the earliest possible level of the visual system.",
+    evidence: [
+      "The Chevreul illusion: perceived light/dark bands at borders that are not physically present",
+      "Center-surround antagonism: diffuse light produces weaker responses than a spot — the system prefers change over uniformity",
+      "Predictive coding: predictions flow downward, errors propagate upward — the same bidirectional difference-detection logic",
+      "Edge enhancement: why edges appear sharper than the physical stimulus warrants"
+    ],
+    task: "Prepare a 3-minute argument that BOTH positions are partially correct. Use at least two evidence anchors. End with: what would each position predict about a patient whose lateral inhibition is selectively damaged?",
+    challenge: "If center-surround RFs are doing something like prediction-error detection, what does that imply about where in the visual system 'prediction' first occurs? Is the retina purely a sensor, or already an inference machine?"
+  },
+  {
+    num: 2,
+    name: "FFA & Face Perception",
+    pathways: "Pathways 1  ·  2  ·  4",
+    accentVar: "--p2",
+    context: "The fusiform face area sits at the intersection of questions about neural architecture, representation, development, and evolution. The same region has been used to argue for completely opposed theories of brain organization.",
+    posA: "The FFA is a face module — dedicated, evolutionarily prewired, and largely innate. Newborns prefer face-like stimuli before any visual experience; prewired connectivity between visual cortex and FFA exists at birth; prosopagnosia selectively impairs face identity while other object recognition remains intact.",
+    posB: "The FFA is a general-purpose expert-recognition area that happens to be trained on faces because faces are what humans are most expert at. Greeble training produces FFA activation comparable to faces; bird and car experts show elevated FFA responses to their domain; the 'face module' may simply be the expert-recognition module.",
+    evidence: [
+      "Morton & Johnson (1991): newborns track face-like patterns within hours of birth",
+      "Kamps et al. (2020): FFA connectivity is prewired in sleeping newborns — 'connectivity precedes function'",
+      "Gauthier et al. (1999, 2000): Greeble and car/bird expertise elevates FFA activation comparably to faces",
+      "Prosopagnosia: FFA damage impairs face identity; voice recognition and feature description remain intact",
+      "FFA is much smaller in 8-year-olds than adults and grows slowly through late adolescence"
+    ],
+    task: "Prepare a 3-minute argument that BOTH positions are partially correct. Explain: (a) what the newborn data tells us that expertise alone cannot explain; (b) what the Greeble data tells us that pure innateness cannot explain; (c) what a 'both/and' account would look like.",
+    challenge: "The FFA develops slowly through late adolescence while the PPA (place area) is already adult-sized at age 8. Does this extended developmental window support the innate module view, the expertise view, or both? What would you need to measure to distinguish them?"
+  },
+  {
+    num: 3,
+    name: "Predictive Coding",
+    pathways: "Pathways 1  ·  2  ·  3  ·  4",
+    accentVar: "--p3",
+    context: "Predictive coding is the most integrative concept in the course — it touches every other topic. But appealing frameworks attract criticism, and those criticisms are worth taking seriously rather than dismissing.",
+    posA: "Predictive coding is a genuine neural mechanism. The brain generates predictions at higher cortical levels; incoming signals are compared against those predictions; only the mismatch propagates further. This explains Gestalt grouping, scene schemas, inattentional blindness, the Rat-Man demonstration, and dark adaptation within one framework.",
+    posB: "Predictive coding is an appealing metaphor that risks being unfalsifiable. Almost any perceptual finding can be re-described in predictive coding language after the fact. It is not clear what evidence would refute it — which means it may be more of a descriptive framework than a mechanistic theory.",
+    evidence: [
+      "Repetition suppression: familiar scenes generate less neural activity than novel ones — consistent with prediction reducing error signals",
+      "Change blindness: stable predictions suppress error signals even for large physical changes when the transient cue is removed",
+      "Dark adaptation: threshold drops as the prediction system's noise floor changes with photoreceptor recovery",
+      "But: top-down processing, Bayesian inference, and unconscious inference explain the same phenomena — what does predictive coding add beyond labeling?"
+    ],
+    task: "Prepare a 3-minute argument that BOTH positions are partially correct. You must: (a) defend predictive coding as mechanistically valuable by citing something it explains that older frameworks cannot; (b) acknowledge its weakness by identifying one phenomenon it describes rather than explains; (c) explain why it remains worth using as a framework even with that limitation.",
+    challenge: "Design one experiment whose result would be predicted by predictive coding but NOT by a simpler top-down priming account. This is genuinely hard — which is exactly the point."
+  },
+  {
+    num: 4,
+    name: "Inattentional Blindness vs. Change Blindness",
+    pathways: "Pathways 1  ·  3",
+    accentVar: "--px",
+    context: "These two phenomena are almost always discussed together as 'attentional failures.' Your task is to show that treating them as the same thing is a mistake — and that treating them as completely different things is also a mistake.",
+    posA: "Both reflect the same underlying limitation: attentional capacity. Conscious awareness requires attention, and when attention is elsewhere — either because another task captures it (inattentional) or because the change occurs during a disruption (change) — the stimulus fails to reach awareness. Same cause, different circumstances.",
+    posB: "The mechanisms are fundamentally different. Inattentional blindness is about resource allocation: the gorilla never gets processed past the preattentive stage. Change blindness is about the absence of a bottom-up transient signal: the blank frame removes the onset cue that would otherwise capture attention automatically. You can have perfect attentional capacity and still show change blindness.",
+    evidence: [
+      "Inattentional blindness: the gorilla is large, central, present for seconds — this is not a sensory failure",
+      "Change blindness: the flicker paradigm removes the transient; the same change is easily detected without the blank frame",
+      "Continuity errors in film: audiences miss large changes between shots because cuts serve as transient-masking events",
+      "Predictive coding partial unifier: in both cases, no prediction error signal sufficient for awareness is generated — but for different reasons"
+    ],
+    task: "Prepare a 3-minute argument that the two phenomena are both similar AND different in important ways. You must: (a) state the one thing they genuinely share; (b) state the one thing that is mechanistically distinct; (c) explain how predictive coding gives a partial unified account and where that account is incomplete.",
+    challenge: "A cyclist in your peripheral vision slowly drifts into your lane over 5 seconds — no sudden onset, no transient. You don't notice until they are almost alongside you. Is this inattentional blindness, change blindness, or neither? What experiment would tell you?"
+  },
+  {
+    num: 5,
+    name: "Hominin Engravings — Mellet et al. (2019)",
+    pathways: "Pathways 2  ·  4  +  methodology",
+    accentVar: "--p4",
+    context: "The Mellet paper uses 21st-century neuroimaging to address a half-million-year-old question about the nature of mind. Your task is to understand both what it shows and what it cannot show — and why that distinction matters.",
+    posA: "The findings strongly support symbolic use. The ventral pathway activation pattern matches the object condition; the visual word form area is engaged. The neural architecture for symbolic cognition was present and functional. The ventral visual cortex is evolutionarily conserved across primates, making the modern-brain results applicable to archaic hominins.",
+    posB: "The findings show that modern human brains process these marks as meaningful — not that the original producers intended meaning. The ventral pathway finding tells us about the stimuli's visual properties (organized, coherent structure), not the cognitive states of their makers. Processing a mark as an object does not mean treating it as a symbol.",
+    evidence: [
+      "Intact vs. scrambled: primary visual cortex activation was similar — the key activation was in anterior ventral regions, not V1",
+      "Object correlation: activation profile for engravings correlated with objects, not scenes, words, or random patterns",
+      "Visual word form area (FUS4): activated by engravings in a left-lateralized pattern — the same region activated by words and symbol-like characters",
+      "Hodgson's refuted alternative: V1 is tuned to line junctions — but V1 did not differentiate intact from scrambled engravings",
+      "Archaeological context: engravings found across multiple sites, produced deliberately, no apparent utilitarian function"
+    ],
+    task: "Prepare a 3-minute argument that BOTH positions are partially correct. You must: (a) clearly state what the ventral pathway finding does demonstrate; (b) clearly state what it cannot demonstrate; (c) propose one additional piece of evidence — from any method — that would substantially strengthen the symbolic cognition interpretation.",
+    challenge: "You find a new site with engravings 800,000 years old — twice as old as the oldest in the Mellet study. You run the same fMRI protocol and get the same ventral pathway result. Does this strengthen, weaken, or neither affect the symbolic cognition hypothesis? What non-neuroimaging evidence would you want before claiming the producers intended meaning?"
+  },
+  {
+    num: 6,
+    name: "Thresholds / Weber's Law — Physical vs. Perceptual",
+    pathways: "Pathways 1  ·  3  +  methodology",
+    accentVar: "--p1",
+    context: "Weber's Law seems like a simple psychophysics fact: the JND is a constant proportion of background intensity. But this simple fact has deep implications that connect measurement methodology to predictive coding and to the fundamental nature of what perception represents.",
+    posA: "Weber's Law is a finding about sensory hardware — specifically receptor population physiology. At higher intensities, more receptors are already active, so a larger absolute change is needed to produce a proportional change in the neural signal. It is a statement about receptor biology, not about prediction.",
+    posB: "Weber's Law is better understood as a property of a prediction-error detection system. The brain represents the world in relative terms because what matters is change relative to context. The JND being proportional to background intensity is exactly what you would predict from a system that encodes prediction errors rather than raw signal levels.",
+    evidence: [
+      "Weber fractions differ across modalities: electric shock 0.01, lifted weight 0.02, sound 0.04, light 0.08 — different receptor populations, different proportionalities",
+      "The Hermann grid: we perceive illusory dark spots at intersections — the visual system responds to contrast, not absolute luminance",
+      "Dark adaptation: the absolute threshold drops over 30 minutes as photoreceptor sensitivity recovers — threshold tracks mechanism, not just intensity",
+      "Predictive coding: encoding deviations from expectation rather than absolute values naturally predicts proportional JNDs"
+    ],
+    task: "Prepare a 3-minute argument that BOTH positions are partially correct. You must: (a) explain what receptor physiology alone can account for; (b) explain what a predictive coding account adds; (c) connect this crossing point to at least one other concept in the course that is made richer by holding both explanations simultaneously.",
+    challenge: "Weber's Law breaks down at very low and very high intensities — the relationship is not perfectly linear across the full range. Does this breakdown support or undermine the predictive coding interpretation? What would you predict about Weber fractions in a brain with impaired top-down prediction?"
+  },
+  {
+    num: 7,
+    name: "Concept Cells — Localist vs. Distributed Representation",
+    pathways: "Pathways 2  ·  3",
+    accentVar: "--p2",
+    context: "Quiroga's concept cell findings are striking and have been cited in support of opposed representational theories. Roy (2017) argues for a purely abstract cognitive system built on localist representation. The debate goes to the heart of how the brain stores meaning.",
+    posA: "Concept cells provide compelling evidence for localist representation. A neuron that responds to a specific person — and only that person, across all sensory formats — is encoding a concept, not a pattern of features. This suggests dedicated neural addresses for concepts, consistent with grandmother cell theory. Roy's analysis of columnar organization supports this at multiple scales of organization.",
+    posB: "Concept cells are consistent with sparse distributed representation, not strict localist coding. Recording samples a tiny fraction of neurons. The 'concept cell' may be the most tuned neuron in a distributed population where many neurons respond partially to many concepts. Dense distributed representation — which McClelland argues is required for generalization — predicts exactly these kinds of highly tuned hub neurons.",
+    evidence: [
+      "Quiroga et al.: single MTL neurons respond to picture, written name, and spoken name of the same individual but not to other stimuli",
+      "Sydney Opera House neuron: responded to multiple angles, colors, and written name — true viewpoint and modality invariance",
+      "Quiroga estimates 40% of MTL cells show such explicit tuning — more than pure grandmother cell theory would predict",
+      "Columnar organization (Mountcastle/Roy): neurons cluster vertically by functional similarity — consistent with localist representation at the population level",
+      "McClelland's critique: only dense distributed representation can generalize to novel instances — sparse or localist codes cannot"
+    ],
+    task: "Prepare a 3-minute argument that BOTH positions capture something real. You must: (a) explain what localist representation correctly predicts that the concept cell data shows; (b) explain what the distributed/sparse account correctly predicts; (c) explain how Roy's layered abstraction hierarchy — from multisensory neurons to concept cells — might dissolve the opposition.",
+    challenge: "You record from 10,000 MTL neurons simultaneously. 'Halle Berry' activates 12 neurons strongly, 80 weakly, and the rest not at all. Does this support localist representation, sparse distributed, or is it ambiguous? What additional data would distinguish them?"
+  }
+];
+
+// ── State ────────────────────────────────────────────────────────────────
+let current = 0;
+let instructorMode = false;
+const SECTIONS = ['context','posA','posB','evidence','task','challenge'];
+const SECTION_LABELS = {
+  context:   { badge:'badge-context',  title:'Context',                       locked: false },
+  posA:      { badge:'badge-posA',     title:'Position A',                    locked: false },
+  posB:      { badge:'badge-posB',     title:'Position B',                    locked: false },
+  evidence:  { badge:'badge-evidence', title:'Evidence anchors',              locked: false },
+  task:      { badge:'badge-task',     title:'Your task (3 minutes)',         locked: false },
+  challenge: { badge:'badge-challenge',title:'Challenge question (reveal after presenting)', locked: true }
+};
+
+// Track open/closed per card
+const sectionState = DEBATES.map(() => {
+  const s = {};
+  SECTIONS.forEach(k => s[k] = false);
+  s.context = true; // context open by default
+  return s;
+});
+
+// ── Build group pills ─────────────────────────────────────────────────────
+function buildPills() {
+  const container = document.getElementById('group-pills');
+  DEBATES.forEach((d, i) => {
+    const pill = document.createElement('button');
+    pill.className = 'pill' + (i === 0 ? ' active' : '');
+    pill.textContent = `Group ${d.num}`;
+    pill.addEventListener('click', () => goTo(i));
+    container.appendChild(pill);
+  });
+}
+
+// ── Navigate ──────────────────────────────────────────────────────────────
+function goTo(idx) {
+  current = Math.max(0, Math.min(DEBATES.length-1, idx));
+  renderCard();
+  updateNav();
+}
+
+function updateNav() {
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === DEBATES.length-1;
+  document.getElementById('nav-counter').textContent = `${current+1} / ${DEBATES.length}`;
+  document.querySelectorAll('.pill').forEach((p,i) => {
+    p.classList.toggle('active', i === current);
+  });
+  // Scroll active pill into view
+  const pills = document.querySelectorAll('.pill');
+  if (pills[current]) pills[current].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+}
+
+// ── Render card ───────────────────────────────────────────────────────────
+function getAccentColor(d) {
+  const map = {
+    '--p1': 'var(--p1)', '--p2': 'var(--p2)',
+    '--p3': 'var(--p3)', '--p4': 'var(--p4)', '--px': 'var(--px)'
+  };
+  return map[d.accentVar] || 'var(--px)';
+}
+
+function renderCard() {
+  const d = DEBATES[current];
+  const state = sectionState[current];
+  const area = document.getElementById('card-area');
+  area.innerHTML = '';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  header.style.setProperty('--accent-color', getAccentColor(d));
+  header.style.borderTopColor = getAccentColor(d);
+  header.innerHTML = `
+    <div class="group-label">Group ${d.num} · Crossing Point Debate Card</div>
+    <div class="card-title">${d.name}</div>
+    <div class="pathways-label">${d.pathways}</div>
+  `;
+  area.appendChild(header);
+
+  // Sections
+  SECTIONS.forEach(key => {
+    const meta = SECTION_LABELS[key];
+    const isOpen = state[key];
+    const isLocked = false; // challenge revealed via 'Reveal all' or keyboard R
+
+    const section = document.createElement('div');
+    section.className = 'reveal-section' + (isOpen ? ' open' : '') + (isLocked ? ' locked' : '');
+    section.dataset.key = key;
+
+    const headerEl = document.createElement('div');
+    headerEl.className = 'reveal-header';
+    headerEl.innerHTML = `
+      <div class="reveal-header-left">
+        <span class="reveal-badge ${meta.badge}">${getBadgeText(key)}</span>
+        <span class="reveal-title">${meta.title}</span>
+      </div>
+      <span class="reveal-chevron">▶</span>
+    `;
+
+    if (!isLocked) {
+      headerEl.addEventListener('click', () => {
+        state[key] = !state[key];
+        section.classList.toggle('open', state[key]);
+        updateRevealNote();
+      });
+    }
+
+    const body = document.createElement('div');
+    body.className = 'reveal-body';
+    body.innerHTML = buildSectionContent(d, key);
+
+    section.appendChild(headerEl);
+    section.appendChild(body);
+    area.appendChild(section);
+  });
+
+  updateRevealNote();
+}
+
+function getBadgeText(key) {
+  const map = {
+    context: 'Context', posA: 'Position A', posB: 'Position B',
+    evidence: 'Evidence', task: 'Your Task', challenge: 'Challenge'
+  };
+  return map[key];
+}
+
+function buildSectionContent(d, key) {
+  if (key === 'context') {
+    return `<p>${d.context}</p>`;
+  }
+  if (key === 'posA' || key === 'posB') {
+    const label = key === 'posA' ? 'A' : 'B';
+    const cls = key === 'posA' ? 'pos-a' : 'pos-b';
+    const text = key === 'posA' ? d.posA : d.posB;
+    return `<div class="position-box ${cls}"><div class="pos-label">Position ${label}</div><p>${text}</p></div>`;
+  }
+  if (key === 'evidence') {
+    const items = d.evidence.map(e => `<div class="evidence-item">${e}</div>`).join('');
+    return `<div class="evidence-list">${items}</div>`;
+  }
+  if (key === 'task') {
+    return `<div class="task-box"><div class="task-label">Your task (3 minutes)</div><p>${d.task}</p></div>`;
+  }
+  if (key === 'challenge') {
+    return `<div class="challenge-box"><div class="challenge-label">Challenge question — reveal after presenting</div><p>${d.challenge}</p></div>`;
+  }
+  return '';
+}
+
+// ── Reveal note ───────────────────────────────────────────────────────────
+function updateRevealNote() {
+  const state = sectionState[current];
+  const open = SECTIONS.filter(k => state[k]).length;
+  const total = SECTIONS.length;
+  document.getElementById('reveal-note').textContent = `${open} of ${total} revealed`;
+}
+
+// ── Reveal all / collapse all ─────────────────────────────────────────────
+document.getElementById('reveal-all-btn').addEventListener('click', () => {
+  const state = sectionState[current];
+  SECTIONS.forEach(k => { state[k] = true; });
+  renderCard();
+});
+
+document.getElementById('collapse-all-btn').addEventListener('click', () => {
+  const state = sectionState[current];
+  SECTIONS.forEach(k => { state[k] = false; });
+  state.context = true; // always keep context open
+  renderCard();
+});
+
+// ── Nav buttons ───────────────────────────────────────────────────────────
+document.getElementById('prev-btn').addEventListener('click', () => goTo(current-1));
+document.getElementById('next-btn').addEventListener('click', () => goTo(current+1));
+
+// ── Keyboard ──────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') goTo(current+1);
+  else if (e.key === 'ArrowLeft') goTo(current-1);
+  else if (e.key === 'r' || e.key === 'R') {
+    const state = sectionState[current];
+    SECTIONS.forEach(k => { state[k] = true; });
+    renderCard();
+  }
+  else if (e.key === 'c' || e.key === 'C') {
+    const state = sectionState[current];
+    SECTIONS.forEach(k => { state[k] = false; });
+    state.context = true;
+    renderCard();
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+buildPills();
+renderCard();
+updateNav();
+</script>
+</body>
+</html>
